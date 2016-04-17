@@ -204,16 +204,17 @@ root = Tk()
 import serial
 import operator
 
-# creating an object
+# creating an object of SutterMP285 class
 
 MP285 = sutterMP285();
 
-# save positions in a list
+# empty lists to save positions and pauses
 listpossave = [];
 listpausesave = [];
 
 # function definitions
-def savepos():
+
+def savepos(): # reads x-y-z positions and pause from the fields and saves them
     entries = [entry1, entry2, entry3];
     pause = float(entry4.get())
     listpausesave.append(pause)
@@ -226,10 +227,9 @@ def savepos():
     else:
         listpossave.append(tuple(map(operator.add, listpossave[-1], tup)))
 
-    print listpossave ####
     textdisp()
 
-def multirun():
+def multirun(): ## executes a loop to go over all the stored positions
     text_widget = Text(root)
     text_widget.grid(row = 16, column = 1)
     scrollbar = Scrollbar(root)
@@ -250,20 +250,14 @@ def multirun():
                 text_widget.insert('1.0', 'run completed \n')
                 text_widget.update()
             
-##    for i in range(len(listpossave)):
-##        print 'processing step ' + str(i) + ' : ' + str(listpossave[i]) + ' um. pause: ' + str(listpausesave[i]) + ' seconds'
-##        #MP285.gotoPosition(listpossave[i])
-##        time.sleep(listpausesave[i])
-##    print 'run completed'
-
-def clearlist():
+def clearlist(): ## clears all the stored values and pauses from the lists
     global listpossave;
     global listpausesave;
     listpossave = [];
     listpausesave = [];
     textdisp()
 
-def listinsert():
+def listinsert(): # add position/pause to the list at a particular index
     if listpossave != []:
         j = int(entry5.get())
         entries = [entry1, entry2, entry3];
@@ -277,7 +271,7 @@ def listinsert():
         print listpausesave
         textdisp()
 
-def removeelem():
+def removeelem(): # to remove a particular entry from the list
     j = int(entry5.get())
     if j < len(listpossave):
         del listpossave[j]
@@ -285,12 +279,12 @@ def removeelem():
         print listpossave ###
         textdisp()
 
-def disconnect():
+def disconnect(): # to terminate the connection
     MP285.__del__()
     stri = 'connection to Sutter MP285 has been terminated'
     textdisp2(stri)
 
-def movearun():
+def movearun(): # executes a single run (moves the stage to x-y-z coordinate)
     entries = [entry1, entry2, entry3];
     tupentries = ();
 
@@ -301,14 +295,13 @@ def movearun():
     stri = 'the stage moved to [' + entry1.get() + ', ' + entry2.get() + ', ' + entry3.get() + ' ] um' 
     textdisp2(stri)
     
-def setVel():
-    #print int(entry6.get()),int(entry7.get())
+def setVel(): # set the velocity parameters 
     MP285.setVelocity(int(entry6.get()),int(entry7.get()))
     stri = 'Velocity : ' + entry6.get() + '\n' +'Scale factor : ' + entry7.get()
     textdisp2(stri)
 
 
-def textdisp():
+def textdisp(): # view text box
     text_widget = Text(root)
 
     scrollbar = Scrollbar(root)
@@ -328,29 +321,29 @@ def textdisp():
     scrollbar.config(command = text_widget.yview)
            
 
-def textdisp2(stri):
+def textdisp2(stri): # view text box
     text_widget = Text(root)
     text_widget.grid(row=16,column=1)
     text_widget.insert('1.0', str(stri))
     text_widget.update()  
     
 
-def getposdisp():
+def getposdisp(): # get the position of the stage
     stri = MP285.getPosition()
     stri = '[x, y, z] = ' + str(stri)
     textdisp2(stri)
 
-def setorig():
+def setorig():      # set the position of the stage  (0,0,0)
     MP285.setOrigin()
     stri = 'coordinates set to [0. , 0. , 0.]'
     textdisp2(stri)
 
-def resetsutter():
+def resetsutter(): # resets the sutter connection 
     stri = 'Sutter has been reset .. '
     textdisp2(stri)
     MP285.sendReset()
 
-def dispgetstat():
+def dispgetstat(): # get the status of Sutter MP285
     stat = MP285.getStatus()
     stri = 'step_mul (usteps/um): ' + str(stat[0]) + '\n' + 'xspeed [velocity] (usteps/sec): ' + str(stat[1]) + '\n' + 'velocity scale factor (usteps/step): ' + str(stat[2])
     textdisp2(stri)
@@ -361,7 +354,7 @@ label_0 = Label(root, text = "Sutter MP285 Control Program", fg = "#0033cc", fon
 label_0.grid(row = 0, column = 1)
 label_0
 
-
+# class for buttons
 class buttons(object):
     def __init__(self, root, text, func, fgcol,bgcol, row, col,entc):
         self.root = root
@@ -380,7 +373,8 @@ class buttons(object):
         button = Button(self.root, text = self.text, command = self.func, fg = self.fgcolour, bg=self.bgcolour)
         button.grid(row = self.r, column = self.c)
         return button
-
+    
+# class for labels
 class Labels(object):
     def __init__(self, root, txt, r, c):
         self.root = root
@@ -397,7 +391,7 @@ class Labels(object):
         item2.grid(row = self.r, column = self.c)
         return item2
 
-
+# creating entry fields and buttons
 xpos = Labels(root, "x position (um)", 6,1)
 xpos.label()
 entry1 = xpos.entry()
@@ -426,10 +420,10 @@ scaleFactor = Labels(root,"scale-factor (10 or 50)",15,1)
 scaleFactor.label()
 entry7 = scaleFactor.entry()
 
-getstat = buttons(root, "get Status", dispgetstat, 'pink','black',2,0,None) #
+getstat = buttons(root, "get Status", dispgetstat, 'pink','black',2,0,None) 
 getstat.createbutton()
 
-findpos = buttons(root, "get Position", getposdisp, 'pink','black',4,0,None) #
+findpos = buttons(root, "get Position", getposdisp, 'pink','black',4,0,None) 
 findpos.createbutton()
 
 gotopos = buttons(root, "go to position", movearun, 'lightgreen','black',6,2,None)
@@ -438,7 +432,7 @@ gotopos.createbutton()
 disconnect = buttons(root, "Disconnect link", disconnect, '#ff0000','black',2,1,None)
 disconnect.createbutton()
 
-origin = buttons(root, "set Origin", setorig, 'white','black',3,2,None) #
+origin = buttons(root, "set Origin", setorig, 'white','black',3,2,None) 
 origin.createbutton()
 
 reset = buttons(root, "Reset", resetsutter, '#ff1a1a','black',2,2,None) #
