@@ -262,13 +262,15 @@ def listinsert(): # add position/pause to the list at a particular index
         j = int(entry5.get())
         entries = [entry1, entry2, entry3];
         tup = ()
-        for i in range(len(entries)):
-            tup = tup + (float(entries[i].get()),)
-        
+        if j != 0:
+            for i in range(len(entries)):
+                tup = tup + (float(entries[i].get())+listpossave[j-1][i],)
+        else:
+            for i in range(len(entries)):
+                tup = tup + (float(entries[i].get()),)
+
         listpossave.insert(j,tup)
         listpausesave.insert(j,float(entry4.get()))
-        print listpossave
-        print listpausesave
         textdisp()
 
 def removeelem(): # to remove a particular entry from the list
